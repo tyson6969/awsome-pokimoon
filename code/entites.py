@@ -5,12 +5,28 @@ class Entity(pygame.sprite.Sprite):
         super().__init__(groups)
 
         self.frame_index, self.frames = 0, frames
+        self.facing_direction = 'down'
 
-        self.image = self.frames['down'][self.frame_index]
+        self.direction = vector()
+        self.speed = 250
+
+        self.image = self.frames[self.get_state()][self.frame_index]
         self.rect = self.image.get_frect(center = pos)
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED *dt
-        self.image = self.frames['down'][int(self.frame_index % len(self.frames['down']))]
+        self.image = self.frames[self.get_state()][int(self.frame_index % len(self.frames[self.get_state()]))]
+
+
+    def get_state(self):
+        moving = bool(self.direction)
+        if moving:
+            if self.direction.x != 0:
+                self.facing_direction = 'right' if self.direction.x > 0 else 'left'
+            if self.direction.y != 0:
+                self.facing_direction = 'down' if self.direction.y > 0 else 'up'        
+        return f'{self.facing_direction}{'' if moving else '_idle'}'
+
+    
 
 class Player(Entity):
     def __init__(self, pos, frames, groups):
@@ -34,7 +50,7 @@ class Player(Entity):
         
 
     def move(self, dt):
-        self.rect.center += self.direction *  250 * dt # ur going to update this later chud maybe edit ur charcter sutff 
+        self.rect.center += self.direction *  self.speed * dt # ur going to update this later chud maybe edit ur charcter sutff 
 
     def update(self, dt):
         self.input() 
