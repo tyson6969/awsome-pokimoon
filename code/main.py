@@ -10,6 +10,7 @@ class Game:
         pygame.init()
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("awsome pokimoon")
+        self.clock = pygame.time.Clock()
 
         # shi group
         self.all_sprites = pygame.sprite.Group()
@@ -33,7 +34,9 @@ class Game:
 
     def run (self):
         while True:
+            dt = self.clock.tick() / 1000
             #merow event loop
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -41,8 +44,9 @@ class Game:
 
 
             # SHI GAME LOGIC
-            self.all_sprites.update()
+            self.all_sprites.update(dt)
             self.all_sprites.draw(self.display_surface)
+
 
             pygame.display.update() 
 if __name__ == '__main__':

@@ -25,9 +25,9 @@ class Player(pygame.sprite.Sprite):
 
         
 
-    def move(self):
-        self.rect.center += self.direction * 250 # ur going to update this later chud maybe edit ur charcter sutff 
+    def move(self, dt):
+        self.rect.center += self.direction *  250 * dt # ur going to update this later chud maybe edit ur charcter sutff 
 
-    def update(self):
+    def update(self, dt):
         self.input() 
-        self.move()
+        self.move(dt)
