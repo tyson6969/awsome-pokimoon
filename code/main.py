@@ -3,6 +3,7 @@ from pytmx.util_pygame import load_pygame
 from os.path import join
 
 from sprites import Sprite
+from entites import Player
 
 class Game:
     def __init__(self):
@@ -11,10 +12,10 @@ class Game:
         pygame.display.set_caption("awsome pokimoon")
 
         # shi group
-        self.all_sprtied = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
 
         self.import_assets()
-        self.setup(self.tmx_maps['world'], 'hosue')
+        self.setup(self.tmx_maps['world'], 'house')
 
     def import_assets(self):
         self.tmx_maps = {'world': load_pygame(join( 'data', 'maps', 'world.tmx')) }
@@ -22,7 +23,13 @@ class Game:
 
     def setup(self, tmx_map, player_start_pos):
         for x,y, surf in tmx_map.get_layer_by_name('Terrain').tiles():
-            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf , self.all_sprtied)
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf , self.all_sprites)
+
+        for obj in tmx_map.get_layer_by_name("Entities"):
+            if obj.name == 'Player' and obj.properties['pos'] == player_start_pos:
+                Player((obj.x, obj.y), self.all_sprites) 
+
+        
 
     def run (self):
         while True:
@@ -34,7 +41,8 @@ class Game:
 
 
             # SHI GAME LOGIC
-            self.all_sprtied.draw(self.display_surface)
+            self.all_sprites.update()
+            self.all_sprites.draw(self.display_surface)
 
             pygame.display.update() 
 if __name__ == '__main__':
