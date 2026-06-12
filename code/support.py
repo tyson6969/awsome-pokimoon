@@ -48,3 +48,14 @@ def import_tilemap(cols, rows, *path):
 			cutout_surf.blit(surf, (0,0), cutout_rect)
 			frames[(col, row)] = cutout_surf
 	return frames
+
+def coast_importer(cols, rows, *path):
+	frame_dict = import_tilemap(cols, rows, *path)
+	new_dict = {}
+	terrains = ['grass', 'grass_i', 'sand_i', 'sand', 'rock', 'rock_i', 'ice', 'ice_i']
+	sides = {'topleft': (0,0), 'top': (1,0), 'topright': (2,0),'left': (0,1), 'right': (2,1), 'bottomleft': (0,2),'bottom': (1,2), 'bottomright': (2,2)}
+	for index,  terrain in enumerate(terrains):
+		new_dict[terrain] = {}
+		for key, pos in sides.items():
+			new_dict[terrain][key] = [frame_dict[(pos[0]+ index * 3, pos[1] + row )] for row in range(0,rows, 3) ]
+	return new_dict
