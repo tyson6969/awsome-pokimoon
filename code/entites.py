@@ -1,11 +1,12 @@
 from settings import *
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, pos, frames, groups):
+    def __init__(self, pos, frames, groups, facing_direction):
         super().__init__(groups)
-
+        self.z = WORLD_LAYERS['main']
+        
         self.frame_index, self.frames = 0, frames
-        self.facing_direction = 'down'
+        self.facing_direction = facing_direction
 
         self.direction = vector()
         self.speed = 250
@@ -27,14 +28,14 @@ class Entity(pygame.sprite.Sprite):
         return f'{self.facing_direction}{'' if moving else '_idle'}'
 
 class Character(Entity):
-    def __init__(self, pos, frames, groups):
-        super().__init__(pos, frames, groups)
+    def __init__(self, pos, frames, groups, facing_direction):
+        super().__init__(pos, frames, groups, facing_direction)
 
 
 class Player(Entity):
-    def __init__(self, pos, frames, groups):
-        super().__init__(pos, frames, groups )
-        
+    def __init__(self, pos, frames, groups, facing_direction):
+        super().__init__(pos, frames, groups, facing_direction)
+
 
         self.direction = vector
 
