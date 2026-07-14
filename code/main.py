@@ -86,7 +86,8 @@ class Game:
         if keys[pygame.K_SPACE]:
             for character in self.character_sprites: # yo chud ur going to use this later
                 if check_connections(100, self.player, character):
-                 print('DIALOG')
+                    self.player.block()
+                    print('DIALOG')
         
 
         

@@ -83,4 +83,8 @@ def coast_importer(cols, rows, *path):
 def check_connections(radius, entity, target, tolerance = 30):
 	relation = vector(target.rect.center) - vector(entity.rect.center)
 	if relation.length( ) < radius:
-		return True
+		if entity.facing_direction == 'left' and relation.x < 0 and abs(relation.y) < tolerance or\
+			entity.facing_direction == 'right' and relation.x > 0 and abs(relation.y) < tolerance or\
+			entity.facing_direction == 'up' and relation.y < 0 and abs(relation.x) < tolerance or\
+			entity.facing_direction == 'down' and relation.y > 0 and abs(relation.x) < tolerance :
+			 return True
