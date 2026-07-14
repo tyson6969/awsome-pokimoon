@@ -80,7 +80,7 @@ class Game:
 
     def run (self):
         while True:
-            dt = self.clock.tick() / 1000 
+            dt = self.clock.tick(180) / 1000 
             #merow event loop
 
             for event in pygame.event.get():
