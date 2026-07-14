@@ -40,7 +40,7 @@ class Player(Entity):
     def __init__(self, pos, frames, groups, facing_direction, collision_sprites):
         super().__init__(pos, frames, groups, facing_direction)
         self.collision_sprites = collision_sprites
-        self.direction = vector()  # also fix this - was 'vector' not 'vector()'
+        self.direction = vector()  
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -53,7 +53,7 @@ class Player(Entity):
             input_vector.x += 1
         if keys[pygame.K_a]:
             input_vector.x -= 1
-        self.direction = input_vector
+        self.direction = input_vector.normalize() if input_vector else input_vector
 
     def move(self, dt):
         self.rect.centerx += self.direction.x * self.speed * dt
@@ -63,7 +63,7 @@ class Player(Entity):
         self.hitbox.centery = self.rect.centery
         self.collisions('vertical')
 
-    def collisions(self, axis):  # ← indented to be inside Player
+    def collisions(self, axis):  
         for sprite in self.collision_sprites:
             if sprite.hitbox.colliderect(self.hitbox):
                 if axis == 'horizontal':
@@ -79,7 +79,7 @@ class Player(Entity):
                         self.hitbox.top = sprite.hitbox.bottom
                     self.rect.centery = self.hitbox.centery
 
-    def update(self, dt):  # ← indented to be inside Player
+    def update(self, dt):  
         self.y_sort = self.rect.centery
         self.input()
         self.move(dt)
