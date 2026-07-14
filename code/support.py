@@ -78,3 +78,9 @@ def coast_importer(cols, rows, *path):
 		for key, pos in sides.items():
 			new_dict[terrain][key] = [frame_dict[(pos[0]+ index * 3, pos[1] + row )] for row in range(0,rows, 3) ]
 	return new_dict
+
+
+def check_connections(radius, entity, target, tolerance = 30):
+	relation = vector(target.rect.center) - vector(entity.rect.center)
+	if relation.length( ) < radius:
+		return True

@@ -18,6 +18,7 @@ class Game:
         # shi group
         self.all_sprites = ALLsprites()
         self.collision_sprites = pygame.sprite.Group()
+        self.character_sprites = pygame.sprite.Group()
 
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
@@ -77,9 +78,15 @@ class Game:
                 Character(
                         pos = (obj.x, obj.y),
                         frames =  self.overworld_frames['characters'][obj.properties['graphic']], 
-                        groups = (self.all_sprites, self.collision_sprites),
+                        groups = (self.all_sprites, self.collision_sprites, self.character_sprites),
                         facing_direction= obj.properties['direction']) 
                 
+    def input(self):
+        keys = pygame.key.get_just_pressed()
+        if keys[pygame.K_SPACE]:
+            for character in self.character_sprites: # yo chud ur going to use this later
+                if check_connections(100, self.player, character):
+                 print('DIALOG')
         
 
         
@@ -96,6 +103,7 @@ class Game:
 
 
             # SHI GAME LOGIC
+            self.input()
             self.all_sprites.update(dt)
             self.display_surface.fill("black")
             self.all_sprites.draw(self.player.rect.center)
