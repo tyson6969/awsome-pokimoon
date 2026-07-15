@@ -105,7 +105,13 @@ class Game:
         
     def create_dialog(self,character):
         if not self.dialog_tree:
-            self.dialog_tree = DialogTree(character, self.player, self.all_sprites, self.fonts['dialog'])
+            self.dialog_tree = DialogTree(character, self.player, self.all_sprites, self.fonts['dialog'], self.end_dialog)
+    
+    
+
+    def end_dialog(self, character):
+        self.dialog_tree = None 
+        self.player.unblock()
         
 
     def run (self):
