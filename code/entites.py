@@ -70,18 +70,34 @@ class Character(Entity):
         return self.character_data['dialog'][f'{'defeated' if self.character_data['defeated'] else 'default'}']  # fixed
 
     def raycast(self):
-        if check_connections(self.radius, self , self.player )and self.has_losd():
+        if check_connections(self.radius, self , self.player )and self.has_losd() and not self.has_moved:
             self.player.block()
             self.player.change_facing_direction(self.rect.center)
+            self.start_move()
 
     def has_losd(self):
         if vector(self.rect.center).distance_to(self.player.rect.center) < self.radius:
             collisions = [bool(rect.clipline(self.rect.center , self.player.rect.center)) for rect in self.collision_rects]
             return not any(collisions)
+    
+    def move(self, dt):
+        if not self.has_moved and self.direction:
+            if not self.hitbox.inflate(10,10).colliderect(self.player.hitbox):
+                self.rect.center += self.direction * self.speed * dt
+                self.hitbox.center = self.rect.center
+            else:
+                self.direction = vector()
+                self.has_moved = True 
+
+
+    def start_move(self):
+        relation = (vector(self.player.rect.center) - vector(self.rect.center)).normalize()
+        self.direction = vector(round(relation.x), round(relation.y))
 
     def update(self, dt):
         self.animate(dt)
         self.raycast()
+        self.move(dt)
 
 
 class Player(Entity):
