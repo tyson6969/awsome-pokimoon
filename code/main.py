@@ -91,7 +91,12 @@ class Game:
                         frames =  self.overworld_frames['characters'][obj.properties['graphic']], 
                         groups = (self.all_sprites, self.collision_sprites, self.character_sprites),
                         facing_direction= obj.properties['direction'],
-                        character_data = TRAINER_DATA[obj.properties['character_id']]) 
+                        character_data = TRAINER_DATA[obj.properties['character_id']],
+                        player = self.player
+                        , create_dialog= self.create_dialog , 
+                        collision_sprites= self.collision_sprites
+                        , radius = obj.properties['radius']) 
+                        
                 
     def input(self):
         if not self.dialog_tree:
