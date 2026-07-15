@@ -21,7 +21,7 @@ class Game:
         pygame.display.set_caption("awsome pokimoon")
         self.clock = pygame.time.Clock()
 
-        # shi group
+        # shi groupsd
         self.all_sprites = ALLsprites()
         self.collision_sprites = pygame.sprite.Group()
         self.character_sprites = pygame.sprite.Group()
