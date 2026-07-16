@@ -79,6 +79,12 @@ def coast_importer(cols, rows, *path):
 			new_dict[terrain][key] = [frame_dict[(pos[0]+ index * 3, pos[1] + row )] for row in range(0,rows, 3) ]
 	return new_dict
 
+def tmx_importer(*path):
+	tmx_dict = {}
+	for folder_path, sub_folders, file_names in walk(join(*path)):
+		for file in file_names:
+			print(file)
+
 
 def check_connections(radius, entity, target, tolerance = 30):
 	relation = vector(target.rect.center) - vector(entity.rect.center)

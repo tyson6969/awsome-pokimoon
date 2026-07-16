@@ -43,6 +43,7 @@ class Game:
     def import_assets(self):
         self.tmx_maps = {'world': load_pygame(join( 'data', 'maps', 'world.tmx')), 
                          'hospital': load_pygame(join( 'data', 'maps', 'hospital.tmx')) }
+       
         
         self.overworld_frames = { 'water': import_folder('graphics', 'tilesets', 'water'),
                                  'coast': coast_importer(24, 12 , 'graphics' , 'tilesets', 'coast'),
@@ -57,6 +58,9 @@ class Game:
         
 
     def setup(self, tmx_map, player_start_pos):
+
+        for group in (self.all_sprites, self.collision_sprites, self.transition_sprites, self.character_sprites):
+            group.empty()
 
         for layer in ['Terrain', 'Terrain Top']:
             for x,y, surf in tmx_map.get_layer_by_name(layer).tiles():
@@ -144,10 +148,17 @@ class Game:
 
 
     def tint_screen(self, dt):
+        if self.tint_mode == 'untint':
+            self.tint_progress -= self.tint_speed * dt
+
         if self.tint_mode == 'tint':
             self.tint_progress += self.tint_speed * dt
+            if self.tint_progress >= 255:
+                self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
+                self.tint_mode = 'untint'
+                self.transition_target = None
 
-
+        self.tint_progress = max(0, min(self.tint_progress, 255))
         self.tint_Surf.set_alpha(self.tint_progress)
         self.display_surface.blit(self.tint_Surf, (0,0))
 
