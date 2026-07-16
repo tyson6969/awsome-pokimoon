@@ -1,7 +1,9 @@
 from settings import *
 from support import check_connections
+from timer import  Timer 
+from random import choice
 
-class Entity(pygame.sprite.Sprite):
+class Entity(pygame.sprite.Sprite): 
     def __init__(self, pos, frames, groups, facing_direction):
         super().__init__(groups)
         self.z = WORLD_LAYERS['main']
@@ -65,9 +67,15 @@ class Character(Entity):
         self.has_noticed = False
         self.radius = int(radius)  
         self.view_directions = character_data['directions']
+        self.timers = {
+            'look around' : Timer(1500, autostart = True, repeat = True, func = self.random_view_direction)}
+    
+    def random_view_direction(self):
+        if self.can_rotate:
+            self.facing_direction = choice(self.view_directions)
 
     def get_dialog(self):
-        return self.character_data['dialog'][f'{'defeated' if self.character_data['defeated'] else 'default'}']  # fixed
+        return self.character_data['dialog'][f'{'defeated' if self.character_data['defeated'] else 'default'}']  
 
     def raycast(self):
         if check_connections(self.radius, self , self.player )and self.has_losd() and not self.has_moved:
@@ -87,7 +95,8 @@ class Character(Entity):
                 self.hitbox.center = self.rect.center
             else:
                 self.direction = vector()
-                self.has_moved = True 
+                self.has_moved = True
+                self.create_dialog(self)
 
 
     def start_move(self):
@@ -95,9 +104,12 @@ class Character(Entity):
         self.direction = vector(round(relation.x), round(relation.y))
 
     def update(self, dt):
+        for timer in self.timers.values():
+            timer.update()
         self.animate(dt)
         self.raycast()
         self.move(dt)
+
 
 
 class Player(Entity):
