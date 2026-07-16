@@ -41,9 +41,7 @@ class Game:
         self.dialog_tree = None
 
     def import_assets(self):
-        self.tmx_maps = {'world': load_pygame(join( 'data', 'maps', 'world.tmx')), 
-                         'hospital': load_pygame(join( 'data', 'maps', 'hospital.tmx')) }
-       
+        self.tmx_maps = tmx_importer('data', 'maps')
         
         self.overworld_frames = { 'water': import_folder('graphics', 'tilesets', 'water'),
                                  'coast': coast_importer(24, 12 , 'graphics' , 'tilesets', 'coast'),

@@ -83,7 +83,8 @@ def tmx_importer(*path):
 	tmx_dict = {}
 	for folder_path, sub_folders, file_names in walk(join(*path)):
 		for file in file_names:
-			print(file)
+			tmx_dict[file.split('.')[0]] = load_pygame(join(folder_path, file))
+	return tmx_dict
 
 
 def check_connections(radius, entity, target, tolerance = 30):
