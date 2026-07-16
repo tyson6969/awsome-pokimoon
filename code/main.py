@@ -7,7 +7,7 @@ from game_data import *
 from pytmx.util_pygame import load_pygame 
 from os.path import join
 
-from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, CollidableSprite
+from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, CollidableSprite, TransitionSprite
 from entites import Player, Character
 from groups import ALLsprites
 from dialog import DialogTree
@@ -25,6 +25,16 @@ class Game:
         self.all_sprites = ALLsprites()
         self.collision_sprites = pygame.sprite.Group()
         self.character_sprites = pygame.sprite.Group()
+        self.transition_sprites = pygame.sprite.Group()
+
+        
+        self.transition_target = None
+        self.tint_Surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT)) # use this later chud
+        self.tint_mode = 'untint'
+        self.tint_progress = 0 
+        self.tint_direction = -1
+        self.tint_speed = 600 
+
 
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
@@ -63,11 +73,16 @@ class Game:
             side = obj.properties['side']
             AnimatedSprite((obj.x, obj.y), self.overworld_frames['coast'][terrain][side], self.all_sprites, WORLD_LAYERS['bg'] )
 
-        for obj in tmx_map.get_layer_by_name("Objects"):
+        for obj in tmx_map.get_layer_by_name("Objects"): #line 67 6767 76767 77676 7 67777777777777777777777777777 676766767
             if obj.name == 'top':
                 Sprite((obj.x, obj.y), obj.image, self.all_sprites, WORLD_LAYERS['top'] )
             else:
                 CollidableSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites) )
+
+        #trans vro i am crine
+
+        for obj in tmx_map.get_layer_by_name('Transition'):
+            TransitionSprite((obj.x, obj.y), (obj.width, obj.height), (obj.properties['target'], obj.properties['pos']), self.transition_sprites )
             
         for obj in tmx_map.get_layer_by_name('Collisions'):
             BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
@@ -120,6 +135,22 @@ class Game:
         self.player.unblock()
         
 
+    def transition_check(self):
+        sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
+        if sprites:
+            self.player.block()
+            self.transition_target = sprites[0].target
+            self.tint_mode = 'tint'
+
+
+    def tint_screen(self, dt):
+        if self.tint_mode == 'tint':
+            self.tint_progress += self.tint_speed * dt
+
+
+        self.tint_Surf.set_alpha(self.tint_progress)
+        self.display_surface.blit(self.tint_Surf, (0,0))
+
     def run (self):
         while True:
             dt = self.clock.tick(180) / 1000 
@@ -134,11 +165,14 @@ class Game:
             # SHI GAME LOGIC
             self.input()
             self.all_sprites.update(dt)
+            self.transition_check()
             self.display_surface.fill("black")
             self.all_sprites.draw(self.player)
 
             if self.dialog_tree: self.dialog_tree.update()
 
+
+            self.tint_screen(dt)
             pygame.display.update()
             
 if __name__ == '__main__':
