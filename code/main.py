@@ -12,6 +12,8 @@ from entites import Player, Character
 from groups import ALLsprites
 from dialog import DialogTree
 from support import *
+from monster import Monster
+from monster_index import MonsterIndex
 
 
 class Game:
@@ -20,6 +22,27 @@ class Game:
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("awsome pokimoon")
         self.clock = pygame.time.Clock()
+
+        self.player_monsters = {
+        0: Monster('Plumette', 30),
+        1: Monster('Ivieron', 29),
+        2: Monster('Pluma', 28),
+        3: Monster('Sparchu', 27),
+        4: Monster('Cindrill', 26),
+        5: Monster('Charmadillo', 25),
+        6: Monster('Finsta', 24),
+        7: Monster('Gulfin', 23),
+        8: Monster('Finiette', 22),
+        9: Monster('Atrox', 21),
+        10: Monster('Pouch', 20),
+        11: Monster('Draem', 19),
+        12: Monster('Larvea', 18),
+        13: Monster('Cleaf', 17),
+        14: Monster('Jacana', 16),
+        15: Monster('Friolera', 15),
+            }
+        
+
 
         # shi groupsd
         self.all_sprites = ALLsprites()
@@ -40,6 +63,10 @@ class Game:
         self.setup(self.tmx_maps['world'], 'house')
         self.dialog_tree = None
 
+        self.monster_index = MonsterIndex(self.player_monsters, self.fonts)
+        self.index_open = False
+
+
     def import_assets(self):
         self.tmx_maps = tmx_importer('data', 'maps')
         
@@ -48,12 +75,14 @@ class Game:
                                  'characters': all_character_import('graphics', 'characters') }
         
         self.fonts = {
-            'dialog': pygame.font.Font(join('graphics', 'fonts', 'PixeloidSans.ttf'), 30)
+            'dialog': pygame.font.Font(join('graphics', 'fonts', 'PixeloidSans.ttf'), 30),
+            'regular': pygame.font.Font(join('graphics', 'fonts', 'PixeloidSans.ttf'), 18),
+            'small': pygame.font.Font(join('graphics', 'fonts', 'PixeloidSans.ttf'), 14),
+            'bold': pygame.font.Font(join('graphics', 'fonts', 'dogicapixelbold.otf'), 20),
         }
 
         
-        
-        
+    
 
     def setup(self, tmx_map, player_start_pos):
 
@@ -125,6 +154,9 @@ class Game:
                         character.change_facing_direction(self.player.rect.center)
                         self.create_dialog(character)
                         character.can_rotate = False
+            
+            if keys[pygame.K_RETURN]:
+                self.index_open = not self.index_open
         
     def create_dialog(self,character):
         if not self.dialog_tree:
@@ -178,7 +210,10 @@ class Game:
             self.display_surface.fill("black")
             self.all_sprites.draw(self.player)
 
-            if self.dialog_tree: self.dialog_tree.update()
+            if self.dialog_tree:
+                self.dialog_tree.update()
+            if self.index_open:
+                self.monster_index.update(dt)
 
 
             self.tint_screen(dt)
