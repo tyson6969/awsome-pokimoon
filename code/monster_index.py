@@ -65,12 +65,29 @@ class MonsterIndex:
             icon_rect = icon_surf.get_frect(center = item_rect.midleft + vector(45, 0))
 
             if item_rect.colliderect(self.main_rect):
-                pygame.draw.rect(self.display_surface, bg_colors, item_rect)
+                
+
+                if item_rect.collidepoint(self.main_rect.topleft):
+                    pygame.draw.rect(self.display_surface,bg_colors, item_rect,0,0,12)
+                elif item_rect.collidepoint(self.main_rect.bottomleft + vector(1, -1)):
+                    pygame.draw.rect(self.display_surface, bg_colors, item_rect,0,0,0,0,12,0)
+
+                else:
+                    pygame.draw.rect(self.display_surface, bg_colors, item_rect)
                 self.display_surface.blit(icon_surf, icon_rect)
                 self.display_surface.blit(text_surf, text_rect)
 
-    def update(self, dt): # 66666666666666777777777777777777 676 76 7 6 76 76 7 6
+        for i in range(self.visible_items):
+            y = self.main_rect.top + self.item_height * i 
+            left = self.main_rect.left
+            right = self.main_rect.left + self.list_width
+            pygame.draw.line(self.display_surface, COLORS['light-gray'], (left, y), (right, y ))
+        shadow = pygame.Surface((5, self.main_rect.height))
+        shadow.set_alpha(100)
+        self.display_surface.blit(shadow,(self.main_rect.left + self.list_width - 4 , self.main_rect.top))
+
+    def update(self, dt):
         self.input()
         self.display_surface.blit(self.tint_surf, (0,0))
-        pygame.draw.rect(self.display_surface, 'black', self.main_rect)
         self.display_list()
+        
