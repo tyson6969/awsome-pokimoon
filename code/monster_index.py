@@ -36,13 +36,15 @@ class MonsterIndex:
 
 
     def display_list(self):
+        offset = 0 if self.index < self.visible_items else -(self.index - self.visible_items +1 ) * self.item_height
+
         for index, monster in self.monsters.items():
             bg_colors = COLORS['gray'] if self.index != index else COLORS['light']
             text_color = COLORS['white']
 
 
 
-            top = self.main_rect.top + index * self.item_height
+            top = self.main_rect.top + index * self.item_height + offset
             item_rect = pygame.FRect(self.main_rect.left, top ,self.list_width, self.item_height)
 
             text_surf = self.fonts['regular'].render(monster.name, False, text_color)

@@ -79,7 +79,7 @@ class Game:
         self.monster_frames = {
             'icons': import_folder_dict('graphics', 'icons' )
         }
-        print(self.monster_frames['icons'])
+        
 
 
 
