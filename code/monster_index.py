@@ -17,6 +17,7 @@ class MonsterIndex:
         self.list_width = self.main_rect.width * 0.3
         self.item_height = self.main_rect.height / self.visible_items
         self.index = 0
+        self.selected_index = None
 
     
     def input(self):
@@ -29,6 +30,16 @@ class MonsterIndex:
             self.index -= 1
         if keys[pygame.K_s]:
             self.index += 1 
+        if keys[pygame.K_SPACE]:
+            if self.selected_index != None:
+                selected_monster = self.monsters[self.selected_index]
+                current_monster = self.monsters[self.index]
+                self.monsters[self.index] = selected_monster
+                self.monsters[self.selected_index] = current_monster
+                self.selected_index = None
+            else:
+                self.selected_index = self.index
+
     
         self.index = self.index % len(self.monsters)
 
@@ -40,7 +51,7 @@ class MonsterIndex:
 
         for index, monster in self.monsters.items():
             bg_colors = COLORS['gray'] if self.index != index else COLORS['light']
-            text_color = COLORS['white']
+            text_color = COLORS['white'] if self.selected_index != index else COLORS['gold']
 
 
 
@@ -58,7 +69,7 @@ class MonsterIndex:
                 self.display_surface.blit(icon_surf, icon_rect)
                 self.display_surface.blit(text_surf, text_rect)
 
-    def update(self, dt):
+    def update(self, dt): # 66666666666666777777777777777777 676 76 7 6 76 76 7 6
         self.input()
         self.display_surface.blit(self.tint_surf, (0,0))
         pygame.draw.rect(self.display_surface, 'black', self.main_rect)
