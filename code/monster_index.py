@@ -16,22 +16,48 @@ class MonsterIndex:
         self.visible_items = 6
         self.list_width = self.main_rect.width * 0.3
         self.item_height = self.main_rect.height / self.visible_items
+        self.index = 0
+
+    
+    def input(self):
+        keys = pygame.key.get_just_pressed()
+        if keys[pygame.K_UP]:
+            self.index -= 1
+        if keys[pygame.K_DOWN]:
+            self.index += 1 
+        if keys[pygame.K_w]:
+            self.index -= 1
+        if keys[pygame.K_s]:
+            self.index += 1 
+    
+        self.index = self.index % len(self.monsters)
+
+
+
 
     def display_list(self):
         for index, monster in self.monsters.items():
+            bg_colors = COLORS['gray'] if self.index != index else COLORS['light']
+            text_color = COLORS['white']
+
+
+
             top = self.main_rect.top + index * self.item_height
             item_rect = pygame.FRect(self.main_rect.left, top ,self.list_width, self.item_height)
 
-            text_surf = self.fonts['regular'].render(monster.name, False, COLORS['white'])
+            text_surf = self.fonts['regular'].render(monster.name, False, text_color)
             text_rect = text_surf.get_frect(midleft = item_rect.midleft + vector(90, 0))
 
             icon_surf = self.icon_frames[monster.name]
             icon_rect = icon_surf.get_frect(center = item_rect.midleft + vector(45, 0))
-            pygame.draw.rect(self.display_surface, COLORS['gray'], item_rect)
-            self.display_surface.blit(icon_surf, icon_rect)
-            self.display_surface.blit(text_surf, text_rect)
+
+            if item_rect.colliderect(self.main_rect):
+                pygame.draw.rect(self.display_surface, bg_colors, item_rect)
+                self.display_surface.blit(icon_surf, icon_rect)
+                self.display_surface.blit(text_surf, text_rect)
 
     def update(self, dt):
+        self.input()
         self.display_surface.blit(self.tint_surf, (0,0))
         pygame.draw.rect(self.display_surface, 'black', self.main_rect)
         self.display_list()
