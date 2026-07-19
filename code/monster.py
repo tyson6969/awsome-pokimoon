@@ -9,7 +9,9 @@ class Monster:
         self.element = MONSTER_DATA[name]['stats']['element']
         self.base_stats = MONSTER_DATA[name]['stats']
         self.health = self.base_stats['max_health'] * self.level
+        self.energy = self.base_stats['max_energy']* self.level
         self.health -= randint(0,200)
+        self.energy -= randint(0,100)
 
 
         self.xp = randint(0,1000)
