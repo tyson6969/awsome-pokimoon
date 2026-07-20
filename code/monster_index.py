@@ -9,6 +9,7 @@ class MonsterIndex:
         self.monsters = monsters
         self.icon_frames = monster_frames['icons']
         self.monster_frames = monster_frames['monsters']
+        self.ui_frames = monster_frames['ui']
         self.frame_index = 0
 
         self.tint_surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -147,7 +148,30 @@ class MonsterIndex:
         energy_rect = energy_text.get_frect(midleft = energy_rect.midleft + vector(10,0))
         self.display_surface.blit(energy_text, energy_rect)
 
-        
+        sides = {'left': health_rect.left, 'right':energy_rect.left}
+        info_height = rect.bottom - health_rect.bottom
+
+        stats_rect = pygame.FRect(sides['left'], health_rect.bottom, health_rect.width,info_height).inflate(0,-60)
+        stats_text = self.fonts['regular'].render('Stats', False, COLORS['white'])
+        stats_text_rect = stats_text.get_frect(bottomleft = stats_rect.topleft)
+        self.display_surface.blit(stats_text, stats_text_rect)
+
+        monster_stats = monster.get_stats()
+        stat_height = stats_rect.height / len(monster_stats)
+
+        for index, (stat, value) in enumerate(monster_stats.items()):
+            single_stat_rect = pygame.FRect(stats_rect.left,stats_rect.top + index * stat_height, stats_rect.width, stat_height)
+
+            icon_surf = self.ui_frames[stat]
+            icon_rect = icon_surf.get_frect(midleft = single_stat_rect.midleft + vector(5, 0))
+            self.display_surface.blit(icon_surf, icon_rect)
+
+
+            text_surf = self.fonts['regular'].render(stat, False, COLORS['white'])
+            text_rect = text_surf.get_frect(topleft = icon_rect.topleft + vector(30, -10))
+            self.display_surface.blit(text_surf, text_rect)
+
+            
 
 
     def update(self, dt):
