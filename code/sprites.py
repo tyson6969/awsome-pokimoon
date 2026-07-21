@@ -8,7 +8,6 @@ class Sprite(pygame.sprite.Sprite):
         self.y_sort = self.rect.centery
         self.hitbox = self.rect.copy()
 
-
 class BorderSprite(Sprite):
     def __init__(self, pos, surf, groups,):
         super().__init__(pos, surf, groups)
@@ -19,7 +18,6 @@ class TransitionSprite(Sprite):
         surf = pygame.Surface(size)
         super().__init__(pos, surf, groups)
         self.target = target
-
 
 class CollidableSprite(Sprite):
     def __init__(self, pos, surf, groups,):
@@ -32,9 +30,6 @@ class MonsterPatchSprite(Sprite):
         super().__init__(pos, surf , groups, WORLD_LAYERS['main' if biome != 'sand' else 'bg'])
         self.y_sort -= 40
 
-
-
-
 class AnimatedSprite(Sprite):
     def __init__(self, pos, frames, groups, z = WORLD_LAYERS['main']):
         self.frame_index, self.frames = 0, frames 
@@ -46,3 +41,18 @@ class AnimatedSprite(Sprite):
 
     def update(self, dt):
         self.animate(dt)
+
+class MonsterSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, frames, groups, monster, index, pos_index, entity):
+
+        self.index = index
+        self.pos_index = pos_index
+        self.entity = entity
+        self.monster = monster
+        self.frame_index = 0
+        self.frames = frames
+        self.state = 'idle'
+
+        super().__init__(groups)
+        self.image = self.frames[self.state][self.frame_index]
+        self.rect = self.image.get_frect(center = pos)

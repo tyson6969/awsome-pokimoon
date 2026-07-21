@@ -14,6 +14,7 @@ from dialog import DialogTree
 from support import *
 from monster import Monster
 from monster_index import MonsterIndex
+from battle import Battle
 
 
 class Game:
@@ -41,10 +42,18 @@ class Game:
         14: Monster('Jacana', 16),
         15: Monster('Friolera', 15),
             }
+
+        self.dummy_monsters = {
+        0: Monster('Plumette', 12),
+        1: Monster('Ivieron', 3),
+        2: Monster('Pluma', 19),
+        3: Monster('Sparchu', 22),
+        4: Monster('Cindrill', 4),
+        }
         
 
 
-        # shi groupsd
+        # shi groups
         self.all_sprites = ALLsprites()
         self.collision_sprites = pygame.sprite.Group()
         self.character_sprites = pygame.sprite.Group()
@@ -56,7 +65,7 @@ class Game:
         self.tint_mode = 'untint'
         self.tint_progress = 0 
         self.tint_direction = -1
-        self.tint_speed = 600 
+        self.tint_speed = 600  # 677777776767677
 
 
         self.import_assets()
@@ -66,6 +75,7 @@ class Game:
         self.monster_index = MonsterIndex(self.player_monsters, self.fonts, self.monster_frames)
         
         self.index_open = False
+        self.battle = Battle(self.player_monsters, self.dummy_monsters, self.monster_frames, self.bg_frames['forest'], self.fonts)
 
 
     def import_assets(self):
@@ -92,6 +102,8 @@ class Game:
             'small': pygame.font.Font(join('graphics', 'fonts', 'PixeloidSans.ttf'), 14),
             'bold': pygame.font.Font(join('graphics', 'fonts', 'dogicapixelbold.otf'), 20),
         }
+
+        self.bg_frames = import_folder_dict('graphics', 'backgrounds')
 
         
     
@@ -157,7 +169,7 @@ class Game:
                         
                 
     def input(self):
-        if not self.dialog_tree:
+        if not self.dialog_tree and not self.battle:
             keys = pygame.key.get_just_pressed()
             if keys[pygame.K_SPACE]:
                 for character in self.character_sprites: # yo chud ur going to use this later
@@ -227,6 +239,10 @@ class Game:
                 self.dialog_tree.update()
             if self.index_open:
                 self.monster_index.update(dt)
+            if self.battle:
+                self.battle.update(dt)
+
+                
 
 
             self.tint_screen(dt)

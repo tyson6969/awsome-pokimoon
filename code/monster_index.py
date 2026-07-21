@@ -61,6 +61,9 @@ class MonsterIndex:
 
 
     def display_list(self):
+        bg_rect = pygame.FRect(self.main_rect.topleft, (self.list_width,self.main_rect.height))
+        pygame.draw.rect(self.display_surface, COLORS['gray'], bg_rect, 0,0,12,0,12,0)
+
         offset = 0 if self.index < self.visible_items else -(self.index - self.visible_items +1 ) * self.item_height
 
         for index, monster in self.monsters.items():
@@ -91,7 +94,7 @@ class MonsterIndex:
                 self.display_surface.blit(icon_surf, icon_rect)
                 self.display_surface.blit(text_surf, text_rect)
 
-        for i in range(min(self.visible_items, len(self.monsters) )):
+        for i in range(1, min(self.visible_items, len(self.monsters) )):
             y = self.main_rect.top + self.item_height * i 
             left = self.main_rect.left
             right = self.main_rect.left + self.list_width
@@ -181,7 +184,7 @@ class MonsterIndex:
             text_rect = text_surf.get_frect(topleft = icon_rect.topleft + vector(30, -10))
             self.display_surface.blit(text_surf, text_rect)
 
-            bar = pygame.FRect((text_rect.left, text_rect.bottom + 2), (single_stat_rect.width * 0.9, 4))
+            bar = pygame.FRect((text_rect.left, text_rect.bottom + 2), (single_stat_rect.width - (text_rect.left - single_stat_rect.left), 4))
             draw_bar(self.display_surface, bar, value,self.max_stats[stat] * monster.level  , COLORS['white'], COLORS['black'])
 
             ability_rect = stats_rect.copy().move_to(left = sides['right'])

@@ -17,6 +17,12 @@ class Monster:
 
         self.xp = randint(0,1000)
         self.level_up = self.level * 150 
+
+    
+    def __repr__(self):
+        return f'monster: {self.name}, lvl: {self.level}'
+
+
     def get_stat(self,stat):
         return self.base_stats[stat] *  self.level
     
