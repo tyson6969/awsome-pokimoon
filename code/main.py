@@ -44,11 +44,14 @@ class Game:
             }
 
         self.dummy_monsters = {
-        0: Monster('Plumette', 12),
-        1: Monster('Ivieron', 3),
-        2: Monster('Pluma', 19),
-        3: Monster('Sparchu', 22),
-        4: Monster('Cindrill', 4),
+        1: Monster('Atrox', 21),
+        2: Monster('Pouch', 20),
+        3: Monster('Draem', 19),
+        4: Monster('Larvea', 18),
+        5: Monster('Cleaf', 17),
+        6: Monster('Jacana', 16),
+        7: Monster('Friolera', 15),
+
         }
         
 
