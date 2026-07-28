@@ -26,3 +26,18 @@ class ALLsprites(pygame.sprite.Group):
                 if sprite == player and player.noticed:
                     rect = self.notice_surf.get_frect(midbottom = sprite.rect.midtop )
                     self.display_surface.blit(self.notice_surf, rect.topleft + self.offset)
+
+class BattleSprites(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+
+
+
+    def draw(self, current_monster):
+        for sprite in sorted(self, key = lambda sprite: sprite.z):
+            if sprite.z == BATTLE_LAYERS['outline']:
+                if current_monster and sprite.monster_sprite == current_monster:
+                    self.display_surface.blit(sprite.image, sprite.rect)
+            else:
+                self.display_surface.blit(sprite.image, sprite.rect)

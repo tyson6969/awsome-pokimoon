@@ -97,7 +97,28 @@ def monster_importer(cols, rows, *path):
 				monster_dic[image_name][key] = [frame_dict[(col,row)] for col in range(cols)]
 	return monster_dic
 
+def outline_creator(frame_dict, width):
+	oultine_framedict = {}
+	for monster, monster_frames in frame_dict.items():
+		oultine_framedict[monster] = {}
+		for state, frames in monster_frames.items():
+			oultine_framedict[monster][state] = []
+			for frame in frames:
+				new_surf = pygame.Surface(vector(frame.get_size())+ vector(width * 2), pygame.SRCALPHA)
+				white_frame = pygame.mask.from_surface(frame).to_surface() #Wtf is a mask twin fk ts at 11 pm fuck u pygame i hate u 
+				white_frame.set_colorkey('black')
 
+				new_surf.blit(white_frame, (0,0))
+				new_surf.blit(white_frame, (width,0))
+				new_surf.blit(white_frame, (width * 2,0))
+				new_surf.blit(white_frame, (width * 2,width))
+				new_surf.blit(white_frame, (width * 2, width * 2))
+				new_surf.blit(white_frame, (width , width * 2))
+				new_surf.blit(white_frame, (0, width * 2))
+				new_surf.blit(white_frame, (0, width ))
+				oultine_framedict[monster][state].append(new_surf)
+
+	return(oultine_framedict)
 
 def draw_bar(surface, rect, value, max_value, color, bg_color, radius = 1):
 	ratio = rect.width / max_value # l ratio + dont care
@@ -119,4 +140,3 @@ def check_connections(radius, entity, target, tolerance = 30):
 			entity.facing_direction == 'up' and relation.y < 0 and abs(relation.x) < tolerance or\
 			entity.facing_direction == 'down' and relation.y > 0 and abs(relation.x) < tolerance :
 			 return True
-		

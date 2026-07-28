@@ -2,6 +2,7 @@ from settings import *
 from support import draw_bar
 from random import uniform
 from monster import Monster
+from timer import Timer
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -58,24 +59,63 @@ class MonsterSprite(pygame.sprite.Sprite):
         self.frames = frames
         self.state = 'idle'
         self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
+        self.z = BATTLE_LAYERS['monster']
+        self.highlight= False
 
         super().__init__(groups)
         self.image = self.frames[self.state][self.frame_index]
         self.rect = self.image.get_frect(center = pos)
 
+
+        self.timers = {
+            'remove highlight': Timer(300, func = lambda: self.set_highlight(False))
+        }
+
+
     def animate(self, dt):
         self.frame_index += self.animation_speed * dt
-        self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
+        self.adjusted_Frame_index = int(self.frame_index % len(self.frames[self.state]))
+        self.image = self.frames[self.state][self.adjusted_Frame_index]
+
+        if self.highlight:
+            white_surf = pygame.mask.from_surface(self.image).to_surface()
+            white_surf.set_colorkey('black')
+            self.image = white_surf
+
+
+    def set_highlight(self, value):
+        self.highlight = value
+        if value:
+            self.timers['remove highlight'].activate()
 
 
 
-    def update(self, dt): 
+    def update(self, dt):
+        for timer in self.timers.values():
+            timer.update()
         self.animate(dt)
+        self.monster.update(dt)
+
+class MonsterOutLineSprite(pygame.sprite.Sprite):
+    def __init__(self, monster_sprite, groups, frames):
+        super().__init__(groups)
+        self.z = BATTLE_LAYERS['outline']
+        self.monster_sprite = monster_sprite
+        self.frames = frames
+    
+        self.image = self.frames[self.monster_sprite.state][self.monster_sprite.frame_index]
+        self.rect = self.image.get_frect(center = self.monster_sprite.rect.center)
+    def update(self, _):
+        self.image = self.frames[self.monster_sprite.state][int(self.monster_sprite.frame_index)% len (self.monster_sprite.frames[self.monster_sprite.state])]
+
+
 
 class MonsterNameSprite(pygame.sprite.Sprite):
     def __init__(self, pos, monster_sprite, groups, font):
         super().__init__(groups)
         self.monster_sprite = monster_sprite
+        self.z = BATTLE_LAYERS['name']
+
         text_surf = font.render(monster_sprite.monster.name, False, COLORS['black'])
         padding = 10
 
@@ -90,6 +130,7 @@ class MonsterLevelSprite(pygame.sprite.Sprite):
         super().__init__(groups)
         self.monster_sprite = monster_sprite
         self.font = font
+        self.z = BATTLE_LAYERS['name']
 
         self.image = pygame.Surface((60,26))
         self.rect = self.image.get_frect(topleft = anchor) if entity == 'player' else self.image.get_frect(topright = anchor)
@@ -117,6 +158,7 @@ class MonsterStatsSprite(pygame.sprite.Sprite):
         self.image = pygame.Surface(size)
         self.rect = self.image.get_frect(midbottom = pos)
         self.font = fonts
+        self.z = BATTLE_LAYERS['overlay']
 
     def update(self, _):
         self.image.fill(COLORS['white'])
@@ -131,4 +173,6 @@ class MonsterStatsSprite(pygame.sprite.Sprite):
                 self.image.blit(text_surf, text_rect)
                 draw_bar(self.image , bar_rect, value, max_value, color, COLORS['black'], 2)
             else:
-                pass
+                init_rect = pygame.FRect((0, self.rect.height - 2), (self.rect.width, 2))
+                draw_bar(self.image, init_rect , value, max_value, color, COLORS['white'], 2)
+
