@@ -1,6 +1,6 @@
-from game_data import MONSTER_DATA
-from random import randint
 
+from random import randint
+from game_data import MONSTER_DATA, ATTACK_DATA
 class Monster:
     def __init__(self, name, level):
         self.name = name
@@ -40,8 +40,11 @@ class Monster:
 
         }
     
-    def get_abilities(self):
-        return[ability for lvl , ability in self.abilities.items() if self.level >= lvl]
+    def get_abilities(self, all = True):
+        if all:
+            return[ability for lvl , ability in self.abilities.items() if self.level >= lvl]
+        else:
+            return [ability for lvl , ability in self.abilities.items() if self.level >= lvl and ATTACK_DATA[ability]['cost'] < self.energy]
      
 
 
