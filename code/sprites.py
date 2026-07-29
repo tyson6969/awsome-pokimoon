@@ -49,7 +49,7 @@ class AnimatedSprite(Sprite):
         self.animate(dt)
 
 class MonsterSprite(pygame.sprite.Sprite):
-    def __init__(self, pos, frames, groups, monster, index, pos_index, entity):
+    def __init__(self, pos, frames, groups, monster, index, pos_index, entity, apply_attack):
 
         self.index = index
         self.pos_index = pos_index
@@ -63,6 +63,7 @@ class MonsterSprite(pygame.sprite.Sprite):
         self.highlight= False
         self.target_sprite = None
         self.current_attack = None
+        self.apply_attack = apply_attack
 
         super().__init__(groups)
         self.image = self.frames[self.state][self.frame_index]
@@ -77,9 +78,12 @@ class MonsterSprite(pygame.sprite.Sprite):
     def animate(self, dt):
         self.frame_index += self.animation_speed * dt
         if self.state == 'attack' and self.frame_index >= len(self.frames['attack']):
+            self.apply_attack(self.target_sprite, self.current_attack, self.monster.get_base_damage(self.current_attack))
             self.state = 'idle'
 
-            
+
+
+
         self.adjusted_Frame_index = int(self.frame_index % len(self.frames[self.state]))
         self.image = self.frames[self.state][self.adjusted_Frame_index]
 
@@ -189,3 +193,18 @@ class MonsterStatsSprite(pygame.sprite.Sprite):
             else:
                 init_rect = pygame.FRect((0, self.rect.height - 2), (self.rect.width, 2))
                 draw_bar(self.image, init_rect , value, max_value, color, COLORS['white'], 2)
+
+class AttackSprite(AnimatedSprite):
+    def __init__(self, pos, frames, groups):
+        super().__init__(pos, frames, groups, BATTLE_LAYERS['overlay'])
+        self.rect.center = pos
+
+    def animate(self, dt):
+        self.frame_index += ANIMATION_SPEED * dt
+        if self.frame_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.kill()
+
+    def update(self, dt):
+        self.animate(dt)

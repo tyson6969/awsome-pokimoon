@@ -58,6 +58,12 @@ class Monster:
     def reduce_energy(self, attack):
         self.energy -= ATTACK_DATA[attack]['cost']
 
+
+
+    def get_base_damage(self, attack):
+        return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
+
+        
     def update(self, dt):
         if not self.paused:
             self.init += self.get_stat('speed') * dt

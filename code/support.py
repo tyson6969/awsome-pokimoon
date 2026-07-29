@@ -120,6 +120,16 @@ def outline_creator(frame_dict, width):
 
 	return(oultine_framedict)
 
+
+def attack_importer(*path):
+	attack_dict = {}
+	for folder_path, _, image_names in walk(join(*path)):
+		for image_name in image_names:
+			name = image_name.split('.')[0]
+			attack_dict[name] = list(import_tilemap(4, 1, folder_path, name).values())
+	return attack_dict
+
+
 def draw_bar(surface, rect, value, max_value, color, bg_color, radius = 1):
 	ratio = rect.width / max_value # l ratio + dont care
 	bg_rect = rect.copy()

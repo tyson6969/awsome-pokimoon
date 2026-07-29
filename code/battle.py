@@ -1,5 +1,5 @@
 from settings import *
-from sprites import MonsterSprite, MonsterNameSprite,  MonsterLevelSprite, MonsterStatsSprite , MonsterOutLineSprite
+from sprites import MonsterSprite, MonsterNameSprite,  MonsterLevelSprite, MonsterStatsSprite , MonsterOutLineSprite, AttackSprite
 from groups import BattleSprites
 from game_data import ATTACK_DATA
 from support import draw_bar
@@ -50,7 +50,7 @@ class Battle:
             pos = pos = list(BATTLE_POSITIONS['right'].values())[pos_index]
             groups =  (self.battle_sprites, self.opponent_sprites)         
 
-        monster_sprite = MonsterSprite(pos, frames, groups, monster, index, pos_index, entity)
+        monster_sprite = MonsterSprite(pos, frames, groups, monster, index, pos_index, entity, self.apply_attack)
         MonsterOutLineSprite(monster_sprite, self.battle_sprites, outline_frames )
 
         name_pos = monster_sprite.rect.midleft + vector(16, -70) if entity == 'player' else monster_sprite.rect.midright + vector(-40, -70)
@@ -71,7 +71,7 @@ class Battle:
                 case 'general': limiter = len(BATTLE_CHOICES['full'])
                 case 'attacks': limiter = len(self.current_monster.monster.get_abilities(all = False))
                 case 'switch' : limiter = len(self.avaliable_monsters)
-                case 'target' : limiter = len(self.opponent_sprites) if  self.selection_side == 'opponent' else len(self.player_sprites)
+                case 'target' : limiter = len(self.opponent_sprites) if  self.opponent_sprites == 'opponent' else len(self.player_sprites)
                 
 
 
@@ -144,6 +144,9 @@ class Battle:
     def update_all_monsters(self,option):
         for monster_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
             monster_sprite.monster.paused = True if option == 'pause' else False
+
+    def apply_attack(self,target_sprite, attack, amount):
+        AttackSprite(target_sprite.rect.center, self.monster_frames['attacks'][ATTACK_DATA[attack]['animation']], self.battle_sprites)
 
     def draw_ui(self):
         if self.current_monster:
