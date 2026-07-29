@@ -61,6 +61,8 @@ class MonsterSprite(pygame.sprite.Sprite):
         self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
         self.z = BATTLE_LAYERS['monster']
         self.highlight= False
+        self.target_sprite = None
+        self.current_attack = None
 
         super().__init__(groups)
         self.image = self.frames[self.state][self.frame_index]
@@ -74,6 +76,10 @@ class MonsterSprite(pygame.sprite.Sprite):
 
     def animate(self, dt):
         self.frame_index += self.animation_speed * dt
+        if self.state == 'attack' and self.frame_index >= len(self.frames['attack']):
+            self.state = 'idle'
+
+            
         self.adjusted_Frame_index = int(self.frame_index % len(self.frames[self.state]))
         self.image = self.frames[self.state][self.adjusted_Frame_index]
 
@@ -88,6 +94,14 @@ class MonsterSprite(pygame.sprite.Sprite):
         if value:
             self.timers['remove highlight'].activate()
 
+
+    def activate_attack(self,target_sprite, attack):
+        self.state = 'attack'
+        self.frame_index = 0
+        self.target_sprite = target_sprite
+        self.current_attack = attack
+        self.monster.reduce_energy(attack)
+        
 
 
     def update(self, dt):
@@ -175,4 +189,3 @@ class MonsterStatsSprite(pygame.sprite.Sprite):
             else:
                 init_rect = pygame.FRect((0, self.rect.height - 2), (self.rect.width, 2))
                 draw_bar(self.image, init_rect , value, max_value, color, COLORS['white'], 2)
-
