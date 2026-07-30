@@ -12,8 +12,6 @@ class Monster:
         self.health = self.base_stats['max_health'] * self.level
         self.energy = self.base_stats['max_energy']* self.level
         self.init = 0
-        self.health -= randint(0,200)
-        self.energy -= randint(0,100)
         self.abilities = MONSTER_DATA[name]['abilities']
         
 

@@ -37,6 +37,10 @@ class Battle:
             for index, monster in {k:v for k,v in monster.items() if k <= 2}.items():
                 self.create_monster(monster, index, index , entity)
 
+            for i in range(len(self.opponent_sprites)):
+                del self.monster_data['opponent'][i]
+
+
     def create_monster(self, monster, index , pos_index, entity):
         frames = self.monster_frames['monsters'][monster.name]
         outline_frames = self.monster_frames['outlines'][monster.name]
@@ -50,7 +54,7 @@ class Battle:
             pos = pos = list(BATTLE_POSITIONS['right'].values())[pos_index]
             groups =  (self.battle_sprites, self.opponent_sprites)         
 
-        monster_sprite = MonsterSprite(pos, frames, groups, monster, index, pos_index, entity, self.apply_attack)
+        monster_sprite = MonsterSprite(pos, frames, groups, monster, index, pos_index, entity, self.apply_attack, self.create_monster)
         MonsterOutLineSprite(monster_sprite, self.battle_sprites, outline_frames )
 
         name_pos = monster_sprite.rect.midleft + vector(16, -70) if entity == 'player' else monster_sprite.rect.midright + vector(-40, -70)
@@ -147,6 +151,47 @@ class Battle:
 
     def apply_attack(self,target_sprite, attack, amount):
         AttackSprite(target_sprite.rect.center, self.monster_frames['attacks'][ATTACK_DATA[attack]['animation']], self.battle_sprites)
+
+        attack_element = ATTACK_DATA[attack]['element']
+        target_element = target_sprite.monster.element
+
+        if attack_element == 'fire' and target_element == 'plant' or \
+            attack_element == 'water' and target_element == 'fire' or \
+            attack_element == 'plant' and target_element == 'water':
+            amount *= 2
+
+
+
+        if attack_element == 'fire' and target_element == 'water' or \
+            attack_element == 'water' and target_element == 'plant' or \
+            attack_element == 'plant' and target_element == 'fire':
+            amount *= 0.5
+
+        target_defense = 1 - target_sprite.monster.get_stat('defense') / 2000
+        target_defense = max(0, min(1, target_defense))
+
+        target_sprite.monster.health -= amount * target_defense
+        
+        self.update_all_monsters('resume')
+        self.check_death()
+
+
+    def check_death(self):
+        for monster_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
+            if monster_sprite.monster.health <= 0:
+                if self.player_sprites in monster_sprite.groups():
+                    pass
+                else:
+                    new_monster_data = (list(self.monster_data['opponent'].values())[0], monster_sprite.index, monster_sprite.pos_index, 'opponent') if self.monster_data['opponent'] else None
+                    if self.monster_data['opponent']:
+                        del self.monster_data['opponent'][min(self.monster_data['opponent'])]
+
+                monster_sprite.delayed_kill(new_monster_data)
+
+
+        
+
+
 
     def draw_ui(self):
         if self.current_monster:
