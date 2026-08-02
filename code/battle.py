@@ -13,6 +13,7 @@ class Battle:
         self.monster_frames = monster_frames
         self.fonts = fonts
         self.monster_data = {'player': player_monsters, 'opponent': oppenent_monsters}
+        self.battle_over = False
 
 
         self.timers = {
@@ -134,6 +135,7 @@ class Battle:
                     if self.indexes['general'] == 0:
                         self.selection_mode = 'attacks'
                     if self.indexes['general'] == 1:
+                        self.current_monster.monster.defending = True
                         self.update_all_monsters('resume')
                         self.current_monster, self.selection_mode = None, None
                         self.indexes['general'] = 0
@@ -163,6 +165,7 @@ class Battle:
     def check_active(self):
         for monster_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
             if monster_sprite.monster.init >= 100:
+                monster_sprite.monster.defending = False
                 self.update_all_monsters('pause')
                 monster_sprite.monster.init = 0
                 monster_sprite.set_highlight(True)
@@ -196,6 +199,8 @@ class Battle:
             amount *= 0.5
 
         target_defense = 1 - target_sprite.monster.get_stat('defense') / 2000
+        if target_sprite.monster.defending:
+            target_defense -= 0.2
         target_defense = max(0, min(1, target_defense))
 
         target_sprite.monster.health -= amount * target_defense
@@ -219,7 +224,7 @@ class Battle:
                     if self.monster_data['opponent']:
                         del self.monster_data['opponent'][min(self.monster_data['opponent'])]
 
-                        xp_amount = monster_sprite.monster_sprite.monster.level * 100 / len(self.player_sprites)
+                        xp_amount = monster_sprite.monster.level * 100 / len(self.player_sprites)
                         for player_sprite in self.player_sprites:
                             player_sprite.monster.update_xp(xp_amount)
 
@@ -238,7 +243,16 @@ class Battle:
     
 
         
+    def check_end(self):
+        if len(self.opponent_sprites) == 0 and not self.battle_over:
+            self.battle_over = True
+            for monster in self.monster_data['player'].values():
+                monster.init = 0
 
+
+        if len(self.player_sprites) == 0:
+            pygame.quit()
+            exit()
 
  
     def draw_ui(self):
@@ -336,10 +350,13 @@ class Battle:
 
     
     def update(self,dt):
+        self.check_end()
         self.input()
         self.update_timers()
         self.display_surface.blit(self.bg_surf ,(0,0))
         self.check_active()
+       
+
         self.battle_sprites.update(dt)
         self.battle_sprites.draw(self.current_monster, self.selection_side , self.selection_mode , self.indexes['target'], self.player_sprites, self.opponent_sprites)
         self.draw_ui()
