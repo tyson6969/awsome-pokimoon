@@ -37,13 +37,15 @@ class BattleSprites(pygame.sprite.Group):
     def draw(self, current_monster, side , mode , target_index, player_sprites, opponent_sprites):
         sprite_group = opponent_sprites if side == 'opponent' else player_sprites
         sprites = {sprite.pos_index: sprite for sprite in sprite_group}
-        target_sprite = sprites.get(target_index)
+        target_sprite = sprites.get(target_index) if sprites else None
 
 
-        for sprite in sorted(self, key = lambda sprite: sprite.z):
+        for sprite in sorted(self, key=lambda sprite: sprite.z):
             if sprite.z == BATTLE_LAYERS['outline']:
-                if current_monster and (sprite.monster_sprite == current_monster and not (mode == 'target' and side =='player') or\
-                    sprite.monster_sprite == target_sprite):
+                if current_monster and (
+                    sprite.monster_sprite == current_monster and not (mode == 'target' and side == 'player')
+                    or sprite.monster_sprite == target_sprite and sprite.monster_sprite.entity == side and mode and mode =='target'
+                ):
                     self.display_surface.blit(sprite.image, sprite.rect)
             else:
                 self.display_surface.blit(sprite.image, sprite.rect)

@@ -233,3 +233,13 @@ class AttackSprite(AnimatedSprite):
 
     def update(self, dt):
         self.animate(dt)
+
+
+class TimedSprite(Sprite):
+    def __init__(self, pos, surf, groups, duration):
+        super().__init__(pos, surf, groups, z = BATTLE_LAYERS['overlay'])
+        self.rect.center = pos 
+        self.death_timer = Timer(duration, autostart = True, func = self.kill)
+
+    def update(self, _):
+        self.death_timer.update()
