@@ -7,7 +7,7 @@ from timer import Timer
 from random import choice
 
 class Battle:
-    def __init__(self, player_monsters, oppenent_monsters, monster_frames, bg_surf, fonts, end_battle, character):
+    def __init__(self, player_monsters, oppenent_monsters, monster_frames, bg_surf, fonts, end_battle, character, sounds):
         self.display_surface = pygame.display.get_surface()
         self.bg_surf = bg_surf
         self.monster_frames = monster_frames
@@ -16,6 +16,7 @@ class Battle:
         self.battle_over = False
         self.end_battle = end_battle
         self.character = character
+        self.sounds = sounds
 
 
         self.timers = {
@@ -185,6 +186,7 @@ class Battle:
 
     def apply_attack(self,target_sprite, attack, amount):
         AttackSprite(target_sprite.rect.center, self.monster_frames['attacks'][ATTACK_DATA[attack]['animation']], self.battle_sprites)
+        self.sounds[ATTACK_DATA[attack]['animation']].play()
 
         attack_element = ATTACK_DATA[attack]['element']
         target_element = target_sprite.monster.element

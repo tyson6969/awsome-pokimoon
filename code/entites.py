@@ -56,7 +56,7 @@ class Entity(pygame.sprite.Sprite):
 
 
 class Character(Entity):
-    def __init__(self, pos, frames, groups, facing_direction, character_data, player, create_dialog, collision_sprites, radius, nurse):
+    def __init__(self, pos, frames, groups, facing_direction, character_data, player, create_dialog, collision_sprites, radius, nurse, notice_sound ):
         super().__init__(pos, frames, groups, facing_direction)
         self.character_data = character_data
         self.player = player
@@ -74,6 +74,8 @@ class Character(Entity):
         'look around': Timer(1500, autostart=True, repeat=True, func=self.random_view_direction),  
         'notice': Timer(500, func=self.start_move)  
             }
+        self.notice_soud = notice_sound
+
     def random_view_direction(self):
         if self.can_rotate:
             self.facing_direction = choice(self.view_directions)
@@ -89,6 +91,7 @@ class Character(Entity):
             self.can_rotate = False
             self.has_noticed = True
             self.player.noticed = True
+            self.notice_soud.play()
 
     def has_losd(self):
         if vector(self.rect.center).distance_to(self.player.rect.center) < self.radius:
