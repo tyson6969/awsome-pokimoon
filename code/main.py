@@ -111,6 +111,8 @@ class Game:
 
         self.bg_frames = import_folder_dict('graphics', 'backgrounds')
 
+        self.start_animation_frames = import_folder('graphics', 'other', 'star animation')
+
         
     
 
@@ -261,7 +263,7 @@ class Game:
             if monster.evolution:
                 if monster.level == monster.evolution[1]:
                     self.player.block()
-                    self.evolution = Evoloution(self.monster_frames['monsters'], monster.name, monster.evolution[0], self.fonts['bold'], self.end_evolution)
+                    self.evolution = Evoloution(self.monster_frames['monsters'], monster.name, monster.evolution[0], self.fonts['bold'], self.end_evolution, self.start_animation_frames)
 
     def end_evolution(self):
         self.evolution = None
