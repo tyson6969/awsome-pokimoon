@@ -7,13 +7,15 @@ from timer import Timer
 from random import choice
 
 class Battle:
-    def __init__(self, player_monsters, oppenent_monsters, monster_frames, bg_surf, fonts):
+    def __init__(self, player_monsters, oppenent_monsters, monster_frames, bg_surf, fonts, end_battle, character):
         self.display_surface = pygame.display.get_surface()
         self.bg_surf = bg_surf
         self.monster_frames = monster_frames
         self.fonts = fonts
         self.monster_data = {'player': player_monsters, 'opponent': oppenent_monsters}
         self.battle_over = False
+        self.end_battle = end_battle
+        self.character = character
 
 
         self.timers = {
@@ -27,7 +29,7 @@ class Battle:
 
         self.current_monster = None
         self.selection_mode = None
-        self.selection_side = 'Player'
+        self.selection_side = 'player'
         self.selected_attack = None
         self.indexes = {
             'general': 0,
@@ -84,7 +86,7 @@ class Battle:
                 case 'general': limiter = len(BATTLE_CHOICES['full'])
                 case 'attacks': limiter = len(self.current_monster.monster.get_abilities(all = False))
                 case 'switch' : limiter = len(self.avaliable_monsters)
-                case 'target' : limiter = len(self.opponent_sprites) if  self.opponent_sprites == 'opponent' else len(self.player_sprites)
+                case 'target' : limiter = len(self.opponent_sprites) if self.selection_side == 'opponent' else len(self.player_sprites)
                 
 
 
@@ -246,6 +248,7 @@ class Battle:
     def check_end(self):
         if len(self.opponent_sprites) == 0 and not self.battle_over:
             self.battle_over = True
+            self.end_battle(self.character)
             for monster in self.monster_data['player'].values():
                 monster.init = 0
 

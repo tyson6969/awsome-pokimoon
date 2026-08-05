@@ -6,6 +6,7 @@ from settings import *
 from game_data import *
 from pytmx.util_pygame import load_pygame 
 from os.path import join
+from random import randint 
 
 from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, CollidableSprite, TransitionSprite
 from entites import Player, Character
@@ -15,6 +16,7 @@ from support import *
 from monster import Monster
 from monster_index import MonsterIndex
 from battle import Battle
+from timer import Timer
  
 
 class Game:
@@ -23,6 +25,7 @@ class Game:
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("awsome pokimoon")
         self.clock = pygame.time.Clock()
+        self.encount_timer = Timer(2000, func = self.monster_encount)
 
         self.player_monsters = {
         0: Monster('Plumette', 30),
@@ -42,6 +45,8 @@ class Game:
         14: Monster('Jacana', 16),
         15: Monster('Friolera', 15),
             }
+        for monster in self.player_monsters.values():
+            monster.health *= 0.5
 
         self.dummy_monsters = {
         0: Monster('Atrox', 1),
@@ -61,6 +66,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.character_sprites = pygame.sprite.Group()
         self.transition_sprites = pygame.sprite.Group()
+        self.monster_sprites = pygame.sprite.Group()
 
         
         self.transition_target = None
@@ -78,7 +84,8 @@ class Game:
         self.monster_index = MonsterIndex(self.player_monsters, self.fonts, self.monster_frames)
         
         self.index_open = False
-        self.battle = Battle(self.player_monsters, self.dummy_monsters, self.monster_frames, self.bg_frames['forest'], self.fonts)
+        # self.battle = Battle(self.player_monsters, self.dummy_monsters, self.monster_frames, self.bg_frames['forest'], self.fonts)
+        self.battle = None
 
 
     def import_assets(self):
@@ -149,7 +156,7 @@ class Game:
             BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
 
         for obj in tmx_map.get_layer_by_name("Monsters"):
-            MonsterPatchSprite((obj.x, obj.y), obj.image, self.all_sprites, obj.properties['biome'] )
+            MonsterPatchSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.monster_sprites), obj.properties['biome'], obj.properties['monsters'], obj.properties['level'])
 
         for obj in tmx_map.get_layer_by_name("Entities"):
             if obj.name == 'Player' :
@@ -171,7 +178,9 @@ class Game:
                         player = self.player
                         , create_dialog= self.create_dialog , 
                         collision_sprites= self.collision_sprites
-                        , radius = obj.properties['radius']) 
+                        , radius = obj.properties['radius'],
+                        nurse = obj.properties['character_id'] == 'nurse')
+                        
                         
                 
     def input(self):
@@ -196,8 +205,21 @@ class Game:
     
 
     def end_dialog(self, character):
-        self.dialog_tree = None 
-        self.player.unblock()
+        self.dialog_tree = None
+        if character.nurse:
+            for monster in self.player_monsters.values():
+                monster.health = monster.get_stat('max_health')
+                monster.energy = monster.get_stat('max_energy')
+
+            self.player.unblock()
+        elif not character.character_data['defeated']:
+            self.transition_target = Battle(self.player_monsters, character.monsters, self.monster_frames, self.bg_frames[character.character_data['biome']], self.fonts, self.end_battle, character = character)
+
+            self.tint_mode = 'tint'
+        else:
+            self.player.unblock()
+            
+    
         
 
     def transition_check(self):
@@ -215,13 +237,43 @@ class Game:
         if self.tint_mode == 'tint':
             self.tint_progress += self.tint_speed * dt
             if self.tint_progress >= 255:
-                self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
+                if type(self.transition_target) == Battle:
+                    self.battle = self.transition_target
+                elif self.transition_target == 'level':
+                    self.battle = None
+                else:
+                    self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
                 self.tint_mode = 'untint'
                 self.transition_target = None
 
         self.tint_progress = max(0, min(self.tint_progress, 255))
         self.tint_Surf.set_alpha(self.tint_progress)
         self.display_surface.blit(self.tint_Surf, (0,0))
+
+
+    def end_battle(self, character):
+        self.transition_target ='level'
+        self.tint_mode = 'tint'
+        if character:
+            character.character_data['defeated'] = True
+            self.create_dialog(character)
+        else:
+            self.player.unblock()
+
+
+    def check_monster(self):
+        if [sprite for sprite in self.monster_sprites if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.direction:
+            if not self.encount_timer.active:
+                self.encount_timer.activate()
+
+    def monster_encount(self):
+        sprites = [sprite for sprite in self.monster_sprites if sprite.rect.colliderect(self.player.hitbox)]
+        if sprites and self.player.direction:
+            self.encount_timer.duration = randint(800,2500)
+            self.player.block()
+            self.transition_target = Battle(self.player_monsters, {index: Monster(monster, sprites[0].level + randint(-3, 3)) for index, monster in enumerate(sprites[0].monsters)}, self.monster_frames, self.bg_frames[sprites[0].biome], self.fonts, self.end_battle, None)
+        self.tint_mode = 'tint'
+        
 
     def run (self):
         while True:
@@ -235,11 +287,13 @@ class Game:
 
 
             # SHI GAME LOGIC
+            self.encount_timer.update()
             self.input()
             self.all_sprites.update(dt)
             self.transition_check()
             self.display_surface.fill("black")
             self.all_sprites.draw(self.player)
+            self.check_monster()
 
             if self.dialog_tree:
                 self.dialog_tree.update()
