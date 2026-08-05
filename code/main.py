@@ -17,6 +17,7 @@ from monster import Monster
 from monster_index import MonsterIndex
 from battle import Battle
 from timer import Timer
+from evolution import Evoloution
  
 
 class Game:
@@ -28,7 +29,7 @@ class Game:
         self.encount_timer = Timer(2000, func = self.monster_encount)
 
         self.player_monsters = {
-        0: Monster('Plumette', 30),
+        0: Monster('Larvea', 4),
         1: Monster('Ivieron', 29),
         2: Monster('Pluma', 28),
         3: Monster('Sparchu', 27),
@@ -48,17 +49,6 @@ class Game:
         for monster in self.player_monsters.values():
             monster.health *= 0.5
 
-        self.dummy_monsters = {
-        0: Monster('Atrox', 1),
-        1: Monster('Pouch', 3),
-        2: Monster('Draem', 4),
-        3: Monster('Larvea', 4),
-        4: Monster('Cleaf', 7),
-        # 5: Monster('Jacana', 16),
-        # 7: Monster('Friolera', 15),
-
-        }
-        
 
 
         # shi groups
@@ -86,6 +76,9 @@ class Game:
         self.index_open = False
         # self.battle = Battle(self.player_monsters, self.dummy_monsters, self.monster_frames, self.bg_frames['forest'], self.fonts)
         self.battle = None
+        self.evolution = None
+
+        self.check_evolution()
 
 
     def import_assets(self):
@@ -257,9 +250,22 @@ class Game:
         if character:
             character.character_data['defeated'] = True
             self.create_dialog(character)
-        else:
+        elif not self.evolution:
             self.player.unblock()
+            self.check_evolution()
 
+
+
+    def check_evolution(self):
+        for index, monster in self.player_monsters.items():
+            if monster.evolution:
+                if monster.level == monster.evolution[1]:
+                    self.player.block()
+                    self.evolution = Evoloution(self.monster_frames['monsters'], monster.name, monster.evolution[0], self.fonts['bold'], self.end_evolution)
+
+    def end_evolution(self):
+        self.evolution = None
+        self.player.unblock()
 
     def check_monster(self):
         if [sprite for sprite in self.monster_sprites if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.direction:
@@ -301,6 +307,8 @@ class Game:
                 self.monster_index.update(dt)
             if self.battle:
                 self.battle.update(dt)
+            if self.evolution:
+                self.evolution.update(dt)
 
                 
 

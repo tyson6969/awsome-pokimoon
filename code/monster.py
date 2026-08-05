@@ -18,7 +18,8 @@ class Monster:
 
 
         self.xp = 0
-        self.level_up = self.level * 150 
+        self.level_up = self.level * 150
+        self.evolution = MONSTER_DATA[self.name]['evolve']
 
     
     def __repr__(self):
