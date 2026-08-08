@@ -1,4 +1,3 @@
-
 from random import randint
 from game_data import MONSTER_DATA, ATTACK_DATA
 class Monster:

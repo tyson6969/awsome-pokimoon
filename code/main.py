@@ -18,6 +18,7 @@ from monster_index import MonsterIndex
 from battle import Battle
 from timer import Timer
 from evolution import Evoloution
+from title import Title
  
 
 class Game:
@@ -70,7 +71,7 @@ class Game:
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
         self.dialog_tree = None
-        self.audio['overworld'].play(-1)
+        # self.audio['overworld'].play(-1)
 
         self.monster_index = MonsterIndex(self.player_monsters, self.fonts, self.monster_frames)
         
@@ -78,6 +79,8 @@ class Game:
         # self.battle = Battle(self.player_monsters, self.dummy_monsters, self.monster_frames, self.bg_frames['forest'], self.fonts)
         self.battle = None
         self.evolution = None
+
+        self.title = Title(self.fonts, self.start_game, self.audio)
 
         
 
@@ -300,6 +303,11 @@ class Game:
             self.player.block()
             self.transition_target = Battle(self.player_monsters, {index: Monster(monster, sprites[0].level + randint(-3, 3)) for index, monster in enumerate(sprites[0].monsters)}, self.monster_frames, self.bg_frames[sprites[0].biome], self.fonts, self.end_battle, None, self.audio )
         self.tint_mode = 'tint'
+
+
+    def start_game(self):
+        self.title = None
+        self.audio['overworld'].play(-1)
         
 
     def run (self):
@@ -307,13 +315,20 @@ class Game:
             dt = self.clock.tick(180) / 1000 
             #merow event loop
 
-            for event in pygame.event.get():
+            events = pygame.event.get()
+
+            for event in events:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
 
 
             # SHI GAME LOGIC
+            if self.title:
+                self.title.update(dt, events)
+                pygame.display.update()
+                continue
+
             self.encount_timer.update()
             self.input()
             self.all_sprites.update(dt)
