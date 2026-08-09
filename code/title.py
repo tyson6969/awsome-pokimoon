@@ -43,20 +43,75 @@ class Title:
 
 
 
-            
+    def change_Setting(self):
+        option = self.settings_options[self.settings_index]
+
+        if option == 'sound':
+            self.sound_on = not self.sound_on
+
+            for sound in self.audio.values():
+                sound.set_volume(1 if self.sound_on else 0)
+
+        if option == 'purple???':
+            self.purple = not self.purple
+
+            if self.purple:
+                self.bg_colors = COLORS['purple']
+
+            else:
+                self.bg_colors = COLORS['water']
 
 
 
-    
+
 
     def input(self, events):
         keys = pygame.key.get_just_pressed()
 
-        if self.menu != 'main':
+        if self.menu == 'settings':
+            if keys[pygame.K_ESCAPE]:
+                self.menu = 'main'
+                return
+
+
+            if keys[pygame.K_DOWN]:
+                self.settings_index = (self.settings_index + 1) % len(self.settings_options)
+
+            if keys[pygame.K_UP]:
+                self.settings_index = (self.settings_index - 1)%len(self.settings_options)
+
+            if keys[pygame.K_s]:
+                self.settings_index = (self.settings_index + 1) % len(self.settings_options)
+
+            if keys[pygame.K_w]:
+                self.settings_index = (self.settings_index - 1)%len(self.settings_options)
+
+            if keys[pygame.K_SPACE]:
+                self.change_Setting()
+
+            mouse_pos = pygame.mouse.get_pos()
+
+            for index, rect in enumerate(self.settings_rects):
+                if rect.collidepoint(mouse_pos):
+                    self.settings_index = index
+
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        for index, rect in enumerate(self.settings_rects):
+                            if rect.collidepoint(event.pos):
+                                self.settings_index = index
+                                self.change_Setting()
+            return
+
+
+        if self.menu == 'instructions':
             if keys[pygame.K_ESCAPE]:
                 self.menu = 'main'
 
             return
+
+
 
         if keys[pygame.K_DOWN]:
             self.selection_index = (self.selection_index + 1) % len(self.options)
@@ -147,8 +202,43 @@ class Title:
             self.display_surface.blit(text_surf, text_rect)
 
 
-        def display_settings(self):
-            pass
+    def display_settings(self):
+        title_surf = self.fonts['bold'].render('settings', False, COLORS['white'])
+        title_rect = title_surf.get_frect(center = (WINDOW_WIDTH / 2 ,100))
+        self.display_surface.blit(title_surf, title_rect)
+
+
+        self.settings_rects = []
+
+        for index, option in enumerate(self.settings_options):
+            selected = index == self.settings_index
+            checked = self.sound_on if option == 'sound' else self.purple
+            label = 'sound' if option == 'sound' else 'purpleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+
+            row_rect = pygame.FRect(0, 0, 310, 50).move_to(center = (WINDOW_WIDTH / 2, 250 + index * 70))
+
+            if selected:
+                pygame.draw.rect(self.display_surface, COLORS['dark white'], row_rect, 0, 5)
+                pygame.draw.rect(self.display_surface, COLORS['white'], row_rect, 2, 5) # check ts chud
+
+            font = self.fonts['bold'] if selected else self.fonts['regular']
+            color = COLORS['red'] if selected else COLORS['white']
+            text_surf = font.render(label, False, color)
+            # text_surf = font.render(label, True, color) #hmmm i wonder how it looks if i made it true will see tho
+            text_rect = text_surf.get_frect(midleft = row_rect.midleft + vector(20, 0))
+            self.display_surface.blit(text_surf, text_rect)
+
+            box_rect = pygame.FRect(0,0, 26,26).move_to(midright = row_rect.midright + vector(-20,0))
+            pygame.draw.rect(self.display_surface, COLORS['white'], box_rect, 2,4)
+
+            if checked:
+                pygame.draw.rect(self.display_surface, COLORS['gold'], box_rect.inflate(-10, -10), 0, 2)
+                self.settings_rects.append(row_rect)
+
+
+
+
+
 
 
 
@@ -157,7 +247,9 @@ class Title:
 
     def update(self, dt, events):
         self.input(events)
-        self.display_surface.fill(COLORS['water'])
+
+        self.display_surface.fill(self.bg_colors)
+        
 
 
         if self.menu == 'main':
@@ -165,6 +257,9 @@ class Title:
 
         if self.menu == 'instructions':
             self.display_instructions()
+
+        if self.menu == 'settings':          
+            self.display_settings()
 
 
 
