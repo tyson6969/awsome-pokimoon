@@ -19,6 +19,7 @@ from battle import Battle
 from timer import Timer
 from evolution import Evoloution
 from title import Title
+from pause import Pause
  
 
 class Game:
@@ -81,6 +82,9 @@ class Game:
         self.evolution = None
 
         self.title = Title(self.fonts, self.start_game, self.audio)
+
+        self.paused = False
+        self.pause = Pause(self.fonts, self.resume_game, self.go_to_main_menu)
 
         
 
@@ -247,6 +251,11 @@ class Game:
                     self.battle = self.transition_target
                 elif self.transition_target == 'level':
                     self.battle = None
+
+                elif self.transition_target == 'game_start':
+                    self.title = None
+                    self.audio['overworld'].play(-1)
+                
                 else:
                     self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
                 self.tint_mode = 'untint'
@@ -306,8 +315,17 @@ class Game:
 
 
     def start_game(self):
-        self.title = None
-        self.audio['overworld'].play(-1)
+        self.transition_target = 'game_start'
+        self.tint_mode = 'tint'
+
+
+
+    def resume_game(self):
+        self.paused = False
+
+    def go_to_main_menu(self):
+        self.paused = False
+        self.title = Title(self.fonts, self.start_game, self.audio)
         
 
     def run (self):
@@ -322,12 +340,24 @@ class Game:
                     pygame.quit()
                     exit()
 
+            keys = pygame.key.get_just_pressed()
+            if keys[pygame.K_ESCAPE] and not self.title and not self.paused:
+                self.paused = not self.paused
+
 
             # SHI GAME LOGIC
             if self.title:
                 self.title.update(dt, events)
+                self.tint_screen(dt)
                 pygame.display.update()
                 continue
+
+            if self.paused:
+                self.display_surface.fill('black')
+                self.pause.update(dt, events)
+                pygame.display.update()
+                continue
+
 
             self.encount_timer.update()
             self.input()

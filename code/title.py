@@ -13,7 +13,7 @@ class Title:
         self.button_rects = []
 
         self.settings_index = 0
-        self.settings_options = ["sound", 'purple???']
+        self.settings_options = ["music", 'purple???']
         self.settings_rects = []
 
         self.sound_on = True
@@ -46,7 +46,7 @@ class Title:
     def change_Setting(self):
         option = self.settings_options[self.settings_index]
 
-        if option == 'sound':
+        if option == 'music':
             self.sound_on = not self.sound_on
 
             for sound in self.audio.values():
@@ -212,8 +212,8 @@ class Title:
 
         for index, option in enumerate(self.settings_options):
             selected = index == self.settings_index
-            checked = self.sound_on if option == 'sound' else self.purple
-            label = 'sound' if option == 'sound' else 'purpleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+            checked = self.sound_on if option == 'msuic' else self.purple
+            label = 'msuic' if option == 'music' else 'purple?????'
 
             row_rect = pygame.FRect(0, 0, 310, 50).move_to(center = (WINDOW_WIDTH / 2, 250 + index * 70))
 
