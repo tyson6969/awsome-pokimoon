@@ -1,4 +1,5 @@
 import os
+import json
 os.environ['SDL_VIDEO_WINDOW_POS'] = '-1400,0' # remove later, this just for me
 
 
@@ -6,7 +7,8 @@ from settings import *
 from game_data import *
 from pytmx.util_pygame import load_pygame 
 from os.path import join
-from random import randint 
+from random import randint
+
 
 from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, CollidableSprite, TransitionSprite
 from entites import Player, Character
@@ -20,6 +22,7 @@ from timer import Timer
 from evolution import Evoloution
 from title import Title
 from pause import Pause
+from character_select import CharacterSelect
  
 
 class Game:
@@ -82,6 +85,7 @@ class Game:
         self.evolution = None
 
         self.title = Title(self.fonts, self.start_game, self.audio)
+        self.character_select = None
 
         self.paused = False
         self.pause = Pause(self.fonts, self.resume_game, self.go_to_main_menu)
@@ -255,7 +259,13 @@ class Game:
                 elif self.transition_target == 'game_start':
                     self.title = None
                     self.audio['overworld'].play(-1)
-                
+
+                elif type(self.transition_target) == tuple and self.transition_target[0] == 'character':
+                    self.player.frames = self.overworld_frames['characters'][self.transition_target[1]]
+                    self.character_select = None
+                    self.audio['overworld'].play(-1)
+
+
                 else:
                     self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
                 self.tint_mode = 'untint'
@@ -316,6 +326,7 @@ class Game:
 
     def start_game(self):
         self.transition_target = 'game_start'
+        self.character_select = CharacterSelect(self.overworld_frames['characters'], self.fonts, self.confirm_character)
         self.tint_mode = 'tint'
 
 
@@ -326,6 +337,10 @@ class Game:
     def go_to_main_menu(self):
         self.paused = False
         self.title = Title(self.fonts, self.start_game, self.audio)
+
+    def confirm_character(self,name):
+        self.transition_target = ('character', name)
+        self.tint_mode = 'tint'
         
 
     def run (self):
@@ -341,7 +356,7 @@ class Game:
                     exit()
 
             keys = pygame.key.get_just_pressed()
-            if keys[pygame.K_ESCAPE] and not self.title and not self.paused:
+            if keys[pygame.K_ESCAPE] and not self.title and not self.character_select and not self.paused:
                 self.paused = not self.paused
 
 
@@ -351,6 +366,13 @@ class Game:
                 self.tint_screen(dt)
                 pygame.display.update()
                 continue
+
+            if self.character_select:
+                self.character_select.update(dt, events)
+                self.tint_screen(dt)
+                pygame.display.update()
+                continue
+
 
             if self.paused:
                 self.display_surface.fill('black')
