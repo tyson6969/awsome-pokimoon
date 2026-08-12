@@ -14,7 +14,6 @@ Download from the GitHub release page
 ![Game Screenshot](image-3.png)
 ![Game Screenshot](image-4.png)
 ![Game Screenshot](image-5.png)
-![Game Screenshot](image-6.png)
 
 ## Places to Explore
 
