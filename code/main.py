@@ -1,6 +1,6 @@
 import os
 import json
-os.environ['SDL_VIDEO_WINDOW_POS'] = '-1400,0' # remove later, this just for me
+
 
 
 from settings import *
@@ -55,7 +55,7 @@ class Game:
         
         for monster in self.player_monsters.values():
             monster.health *= 0.5
-            
+
 
 
 
