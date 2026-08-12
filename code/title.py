@@ -1,15 +1,20 @@
 from settings import *
+from os.path import exists
+
 
 class Title:
-    def __init__(self, fonts, start_game, audio):
+    def __init__(self, fonts, start_game, audio, load_game):
         self.display_surface = pygame.display.get_surface()
         self.fonts = fonts
         self.start_game = start_game
         self.audio = audio
+        self.load_game = load_game
 
         self.selection_index = 0
         self.menu = 'main'
         self.options = ['play', 'settings', 'instructions', 'quit']
+        if exists('save.json'):
+            self.options.insert(1, 'continue')
         self.button_rects = []
 
         self.settings_index = 0
@@ -29,6 +34,9 @@ class Title:
 
         if option == 'play':
             self.start_game()
+
+        if option == 'continue':
+            self.load_game()
 
         if option == 'quit':
             pygame.quit()
@@ -192,7 +200,9 @@ class Title:
             'DEFEAT TRAINERS TO PROGRESS',
             'Visit the nurse to heal your monsters to restore their health and energy',
             '',
-            'ESC OR SPACE:go back'
+            'ESC OR SPACE:go back',
+            '',
+            'pause and then press save to save your progress'
         ]
 
 
@@ -212,8 +222,8 @@ class Title:
 
         for index, option in enumerate(self.settings_options):
             selected = index == self.settings_index
-            checked = self.sound_on if option == 'msuic' else self.purple
-            label = 'msuic' if option == 'music' else 'purple?????'
+            checked = self.sound_on if option == 'music' else self.purple
+            label = 'music' if option == 'music' else 'purple?????'
 
             row_rect = pygame.FRect(0, 0, 310, 50).move_to(center = (WINDOW_WIDTH / 2, 250 + index * 70))
 
@@ -233,7 +243,7 @@ class Title:
 
             if checked:
                 pygame.draw.rect(self.display_surface, COLORS['gold'], box_rect.inflate(-10, -10), 0, 2)
-                self.settings_rects.append(row_rect)
+            self.settings_rects.append(row_rect)
 
 
 

@@ -221,7 +221,7 @@ class Battle:
                     active_monsters = [(monster_sprite.index, monster_sprite.monster) for monster_sprite in self.player_sprites.sprites()]
                     avaliable_monsters = [(index, monster)for index, monster in self.monster_data['player'].items() if monster.health > 0  and (index, monster) not in active_monsters] #fuck you
                     if avaliable_monsters:  
-                        new_monster_data = [(monster, index, monster_sprite.pos_index, 'player') for index, monster in self.avaliable_monsters][0]
+                        new_monster_data = [(monster, index, monster_sprite.pos_index, 'player') for index, monster in avaliable_monsters][0]
                     else:
                         new_monster_data = None
                 else:

@@ -32,27 +32,30 @@ class Game:
         pygame.display.set_caption("awsome pokimoon")
         self.clock = pygame.time.Clock()
         self.encount_timer = Timer(2000, func = self.monster_encount)
+        
 
         self.player_monsters = {
-        0: Monster('Larvea', 3),
-        1: Monster('Ivieron', 29),
-        2: Monster('Pluma', 28),
-        3: Monster('Sparchu', 27),
-        4: Monster('Cindrill', 26),
-        5: Monster('Charmadillo', 25),
-        6: Monster('Finsta', 24),
-        7: Monster('Gulfin', 23),
-        8: Monster('Finiette', 22),
-        9: Monster('Atrox', 21),
-        10: Monster('Pouch', 20),
-        11: Monster('Draem', 19),
-        12: Monster('Larvea', 18),
-        13: Monster('Cleaf', 17),
-        14: Monster('Jacana', 16),
-        15: Monster('Friolera', 15),
-            }
+        0: Monster('Larvea', 3),        
+        1: Monster('Ivieron', 12),
+        2: Monster('Pluma', 15),
+        3: Monster('Sparchu', 14),     
+        4: Monster('Cindrill', 15),
+        5: Monster('Charmadillo', 21), 
+        6: Monster('Finsta', 33),       
+        7: Monster('Gulfin', 12),
+        8: Monster('Finiette', 12),
+        9: Monster('Atrox', 10),
+        10: Monster('Pouch', 10),
+        11: Monster('Draem', 10),
+        12: Monster('Cleaf', 8),        
+        13: Monster('Jacana', 7),
+        14: Monster('Friolera', 26),   
+        15: Monster('Friolera', 15),    
+        }
+        
         for monster in self.player_monsters.values():
             monster.health *= 0.5
+            
 
 
 
@@ -74,6 +77,7 @@ class Game:
 
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
+        self.current_map = 'world'
         self.dialog_tree = None
         # self.audio['overworld'].play(-1)
 
@@ -84,11 +88,11 @@ class Game:
         self.battle = None
         self.evolution = None
 
-        self.title = Title(self.fonts, self.start_game, self.audio)
+        self.title = Title(self.fonts, self.start_game, self.audio, self.load_game)
         self.character_select = None
 
         self.paused = False
-        self.pause = Pause(self.fonts, self.resume_game, self.go_to_main_menu)
+        self.pause = Pause(self.fonts, self.resume_game, self.go_to_main_menu, self.save_game)
 
         
 
@@ -258,7 +262,7 @@ class Game:
 
                 elif self.transition_target == 'game_start':
                     self.title = None
-                    self.audio['overworld'].play(-1)
+                    
 
                 elif type(self.transition_target) == tuple and self.transition_target[0] == 'character':
                     self.player.frames = self.overworld_frames['characters'][self.transition_target[1]]
@@ -267,6 +271,7 @@ class Game:
 
 
                 else:
+                    self.current_map = self.transition_target[0]
                     self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
                 self.tint_mode = 'untint'
                 self.transition_target = None
@@ -295,12 +300,49 @@ class Game:
         for index, monster in self.player_monsters.items():
             if monster.evolution:
                 if monster.level == monster.evolution[1]:
-                    self.audi['evolution'].play()
+                    self.audio['evolution'].play()
                     self.player.block()
                     self.evolution = Evoloution(self.monster_frames['monsters'], monster.name, monster.evolution[0], self.fonts['bold'], self.end_evolution, self.start_animation_frames)
                     self.player_monsters[index] = Monster(monster.evolution[0], monster.level)
         if not self.evolution:
             self.audio['overworld'].play(-1)
+
+    def save_game(self):
+        save_data = {
+            'map': self.current_map,
+            'pos': (self.player.rect.centerx, self.player.rect.centery),
+            'monsters': {index: {'name': monster.name, 'level': monster.level, 'xp': monster.xp, 'health': monster.health, 'energy': monster.energy} for index, monster in self.player_monsters.items()},
+            'defeated': {char_id: data['defeated'] for char_id, data in TRAINER_DATA.items()}
+        }
+
+        with open('save.json', 'w') as save_file:
+            json.dump(save_data, save_file)
+
+
+    def load_game(self):
+        with open('save.json') as save_file:
+            save_data = json.load(save_file)
+
+        self.player_monsters = {}
+        for index, data in save_data['monsters'].items():
+            monster  = Monster(data['name'], data['level'])
+            monster.xp = data['xp']
+            monster.health = data['health']
+            monster.energy = data['energy']
+            self.player_monsters[int(index)] = monster
+
+        for char_id, defeated in save_data['defeated'].items():
+            TRAINER_DATA[char_id]['defeated'] = defeated
+
+        self.current_map = save_data['map']
+        self.setup(self.tmx_maps[self.current_map], 'house')
+        self.all_sprites.add(self.player)
+        self.player.rect.center = save_data['pos']
+        self.player.hitbox.center = save_data['pos']
+
+        self.title = None
+        self.audio['overworld'].play(-1)
+        
 
     def end_evolution(self):
         self.evolution = None
@@ -321,7 +363,7 @@ class Game:
             self.encount_timer.duration = randint(800,2500)
             self.player.block()
             self.transition_target = Battle(self.player_monsters, {index: Monster(monster, sprites[0].level + randint(-3, 3)) for index, monster in enumerate(sprites[0].monsters)}, self.monster_frames, self.bg_frames[sprites[0].biome], self.fonts, self.end_battle, None, self.audio )
-        self.tint_mode = 'tint'
+            self.tint_mode = 'tint'
 
 
     def start_game(self):
@@ -336,7 +378,7 @@ class Game:
 
     def go_to_main_menu(self):
         self.paused = False
-        self.title = Title(self.fonts, self.start_game, self.audio)
+        self.title = Title(self.fonts, self.start_game, self.audio, self.load_game)
 
     def confirm_character(self,name):
         self.transition_target = ('character', name)
@@ -356,9 +398,8 @@ class Game:
                     exit()
 
             keys = pygame.key.get_just_pressed()
-            if keys[pygame.K_ESCAPE] and not self.title and not self.character_select and not self.paused:
+            if keys[pygame.K_ESCAPE] and not self.title and not self.character_select:
                 self.paused = not self.paused
-
 
             # SHI GAME LOGIC
             if self.title:

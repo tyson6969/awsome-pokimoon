@@ -3,15 +3,17 @@
 
 from settings import *
 
+
 class Pause:
-    def __init__(self, fonts, resume_game, main_menu):
+    def __init__(self, fonts, resume_game, main_menu, save_game):
         self.display_surface = pygame.display.get_surface()
         self.fonts = fonts
         self.resume_game = resume_game
         self.main_menu = main_menu
+        self.save_game = save_game
 
         self.selection_index = 0
-        self.options = ['continue', 'main menu', 'quit']
+        self.options = ['continue', 'save','main menu', 'quit']
         self.button_Rects = []
 
 
@@ -23,6 +25,9 @@ class Pause:
 
         if option == 'continue':
             self.resume_game()
+
+        if option == 'save':
+            self.save_game()
 
         if option == 'main menu':
             self.main_menu()
