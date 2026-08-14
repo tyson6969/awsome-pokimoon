@@ -40,7 +40,7 @@ Download from the GitHub release page
 - **ESC**: Pause
 - **Enter**: Open Index
 
-For more instructions, see the in-game guide.
+For more instructions, see the in game guide.
 
 ---
 
